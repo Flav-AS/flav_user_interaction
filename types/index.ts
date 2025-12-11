@@ -59,3 +59,19 @@ export interface ClientExport {
   authorizedEmails: string[];
   exportedAt: string;
 }
+
+// Chart of Accounts types
+export interface ChartAccount {
+  id: string;
+  code: number;
+  name: string;
+  groupIds: string[];
+}
+
+export interface AccountsGroup {
+  id: string;
+  name: string;
+  parentId?: string;
+  accountIds: string[];
+  children?: AccountsGroup[];
+}

@@ -154,7 +154,7 @@ export default function AccountGroupManager({ client, onUpdate }: Props) {
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
             placeholder="Enter group name..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-500"
           />
           <button
             onClick={createAccountGroup}
@@ -227,7 +227,7 @@ export default function AccountGroupManager({ client, onUpdate }: Props) {
                     if (account) addAccountToGroup(account);
                     e.target.value = '';
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border text-gray-500 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   defaultValue=""
                 >
                   <option value="" disabled>Select an account...</option>
@@ -266,7 +266,7 @@ export default function AccountGroupManager({ client, onUpdate }: Props) {
                             Remove
                           </button>
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 text-gray-500">
                           <label className="text-xs text-gray-600">Main Group:</label>
                           <select
                             value={currentGroup}
