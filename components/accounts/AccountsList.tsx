@@ -111,7 +111,7 @@ export default function AccountsList({
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
             placeholder="Code"
-            className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-24 px-3 py-2 border border-gray-300 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <input
             type="text"
@@ -119,7 +119,7 @@ export default function AccountsList({
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Account name"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="flex-1 px-3 py-2 border border-gray-300 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <button
             onClick={handleCreate}
@@ -169,7 +169,7 @@ export default function AccountsList({
                           type="number"
                           value={editCode}
                           onChange={(e) => setEditCode(e.target.value)}
-                          className="w-20 px-2 py-1 border border-blue-500 rounded text-sm"
+                          className="w-20 px-2 py-1 border text-gray-500 border-blue-500 rounded text-sm"
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -177,7 +177,7 @@ export default function AccountsList({
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="w-full px-2 py-1 border border-blue-500 rounded text-sm"
+                          className="w-full px-2 py-1 border border-blue-500 text-gray-500 rounded text-sm"
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -191,7 +191,7 @@ export default function AccountsList({
                                 type="checkbox"
                                 checked={editGroupIds.includes(group.id)}
                                 onChange={() => toggleGroupMembership(group.id)}
-                                className="mr-1"
+                                className="mr-1 text-gray-500"
                               />
                               {group.name}
                             </label>

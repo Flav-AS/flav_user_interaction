@@ -69,7 +69,7 @@ function TreeNode({
         className={`flex items-center gap-2 py-2 px-3 rounded cursor-pointer transition-colors ${
           selectedGroupId === group.id
             ? 'bg-blue-100 text-blue-900'
-            : 'hover:bg-gray-100'
+            : 'hover:bg-gray-100 text-gray-500'
         }`}
         style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}
       >
@@ -118,7 +118,7 @@ function TreeNode({
                 }
               }}
               onClick={(e) => e.stopPropagation()}
-              className="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none text-sm"
+              className="flex-1 px-2 py-1 text-gray-500 border border-blue-500 rounded focus:outline-none text-sm"
               autoFocus
             />
           ) : (
@@ -138,17 +138,19 @@ function TreeNode({
               e.stopPropagation();
               setIsEditing(true);
             }}
-            className="p-1 text-gray-600 hover:text-blue-600 text-xs"
+            className="p-1 text-gray-700 bg-green-400 hover:text-blue-600 text-xs"
             title="Rename"
           >
-            ✎
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-fill text-gray-700 hover:text-blue-600" viewBox="0 0 16 16">
+              <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+            </svg>
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsEditingParent(!isEditingParent);
             }}
-            className="p-1 text-gray-600 hover:text-green-600 text-xs"
+            className="p-1 text-gray-700 hover:text-green-600 text-xs"
             title="Change parent"
           >
             ↑
@@ -160,10 +162,10 @@ function TreeNode({
                 onDeleteGroup(group.id);
               }
             }}
-            className="p-1 text-gray-600 hover:text-red-600 text-xs"
+            className="p-1 text-gray-700 hover:text-red-600 text-xs"
             title="Delete"
           >
-            ✕
+            X
           </button>
         </div>
       </div>
@@ -256,12 +258,12 @@ export default function AccountsTreeView({
             onChange={(e) => setNewGroupName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateGroup()}
             placeholder="New group name..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-500 text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <select
             value={newGroupParent}
             onChange={(e) => setNewGroupParent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           >
             <option value="">Root level</option>
             {allGroups.map((g) => (
