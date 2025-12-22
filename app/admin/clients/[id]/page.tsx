@@ -18,6 +18,8 @@ export default function ClientAccountsPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [exportData, setExportData] = useState<any>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   useEffect(() => {
     fetchClient();
@@ -66,6 +68,31 @@ export default function ClientAccountsPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function startEditingName() {
+    if (client) {
+      setEditedName(client.name);
+      setIsEditingName(true);
+    }
+  }
+
+  function saveClientName() {
+    if (!client || !editedName.trim()) {
+      setIsEditingName(false);
+      return;
+    }
+
+    setClient({
+      ...client,
+      name: editedName.trim(),
+    });
+    setIsEditingName(false);
+  }
+
+  function cancelEditingName() {
+    setIsEditingName(false);
+    setEditedName('');
   }
 
   async function exportClientData() {
@@ -242,8 +269,47 @@ export default function ClientAccountsPage() {
             ← Back to Admin Dashboard
           </Link>
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
+            <div className="flex-1">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveClientName();
+                      if (e.key === 'Escape') cancelEditingName();
+                    }}
+                    className="text-3xl font-bold text-gray-900 border-b-2 border-blue-500 focus:outline-none px-2"
+                    autoFocus
+                  />
+                  <button
+                    onClick={saveClientName}
+                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEditingName}
+                    className="px-3 py-1 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
+                  <button
+                    onClick={startEditingName}
+                    className="text-gray-400 hover:text-gray-600"
+                    title="Edit client name"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <p className="mt-1 text-sm text-gray-500">
                 Manage account groups and organize accounts hierarchically
               </p>
