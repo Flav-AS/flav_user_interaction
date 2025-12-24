@@ -24,9 +24,18 @@ export default function ClientAccountsPage() {
 const [originalClient, setOriginalClient] = useState<string>('');
 const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  useEffect(() => {
-    fetchClient();
-  }, [clientId]);
+  // 1. Fetch client (only runs when clientId changes)
+useEffect(() => {
+  fetchClient();
+}, [clientId]);
+
+// 2. Track changes (only runs when client changes)
+useEffect(() => {
+  if (client && originalClient) {
+    const currentState = JSON.stringify(client);
+    setHasUnsavedChanges(currentState !== originalClient);
+  }
+}, [client]); 
 
   useEffect(() => {
   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -87,6 +96,18 @@ const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
       setSaving(false);
     }
   }
+
+  const handleBackClick = () => {
+  if (hasUnsavedChanges) {
+    if (confirm('You have unsaved changes. Do you want to leave without saving?')) {
+      setHasUnsavedChanges(false);
+      router.push('/admin');
+    }
+  } else {
+    router.push('/admin'); // Navigate immediately if no changes
+  }
+  console.log('Back to Admin Dashboard clicked');
+};
 
   function startEditingName() {
     if (client) {
@@ -270,9 +291,9 @@ const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error || 'Client not found'}</p>
-          <Link href="/admin" className="text-blue-600 hover:underline">
+          <button onClick={handleBackClick} className="text-blue-600 hover:underline">
             Back to Admin Dashboard
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -283,9 +304,9 @@ const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
       <div className="max-w-[1800px] mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/admin" className="text-sm text-blue-600 hover:underline mb-2 inline-block">
+          <button onClick={handleBackClick} className="text-blue-600 hover:underline">
             ← Back to Admin Dashboard
-          </Link>
+          </button>
           <div className="flex justify-between items-center">
             <div className="flex-1">
               {isEditingName ? (
