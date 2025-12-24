@@ -12,6 +12,7 @@ export interface AccountGroup {
   name: string;
   accounts: Account[];
   parentGroupId?: string;
+  // parentId?: string;
 }
 
 export interface GroupHierarchy {
