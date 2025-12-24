@@ -28,37 +28,51 @@ export async function POST(
       );
     }
 
-    // Create a new client with duplicated data
-    const duplicatedClient = {
-      id: `client-${Date.now()}`,
-      name: name.trim(),
-      accountGroups: originalClient.accountGroups.map(group => ({
+    // Create ID mappings for account groups to preserve parent-child relationships
+    const groupIdMap = new Map<string, string>();
+    
+    // First pass: generate new IDs for all groups
+    originalClient.accountGroups.forEach(group => {
+      const newId = `ag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      groupIdMap.set(group.id, newId);
+    });
+
+    // Second pass: duplicate groups with mapped parent IDs
+    const duplicatedAccountGroups = originalClient.accountGroups.map(group => {
+      const newGroup: any = {
         ...group,
-        id: `ag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: groupIdMap.get(group.id)!,
         accounts: group.accounts.map(account => ({
           ...account,
           id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         })),
-      })),
-      groupHierarchy: originalClient.groupHierarchy.map(hierarchy => ({
-        ...hierarchy,
-        id: `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      })),
-      authorizedEmails: [...originalClient.authorizedEmails],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      };
 
-    // Add the duplicated client to the data service
-    // This assumes you have a method to add a client directly
-    // If not, we'll need to update the dataService
-    const newClient = dataService.createClient(duplicatedClient.name);
+      // Map parentId to new ID if it exists
+      if ((group as any).parentId) {
+        const newParentId = groupIdMap.get((group as any).parentId);
+        if (newParentId) {
+          newGroup.parentId = newParentId;
+        }
+      }
+
+      return newGroup;
+    });
+
+    // Duplicate hierarchy with new IDs
+    const duplicatedHierarchy = originalClient.groupHierarchy.map(hierarchy => ({
+      ...hierarchy,
+      id: `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    }));
+
+    // Create a new client with duplicated data
+    const newClient = dataService.createClient(name.trim());
     
     // Update the new client with all the duplicated data
     const updatedClient = dataService.updateClient(newClient.id, {
-      accountGroups: duplicatedClient.accountGroups,
-      groupHierarchy: duplicatedClient.groupHierarchy,
-      authorizedEmails: duplicatedClient.authorizedEmails,
+      accountGroups: duplicatedAccountGroups,
+      groupHierarchy: duplicatedHierarchy,
+      authorizedEmails: [...originalClient.authorizedEmails],
     });
 
     return NextResponse.json({ client: updatedClient }, { status: 201 });

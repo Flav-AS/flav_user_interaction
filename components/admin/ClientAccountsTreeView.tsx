@@ -186,14 +186,35 @@ function TreeNode({
       {/* Parent selector */}
       {isEditingParent && (
         <div
-          className="ml-8 mb-2 p-2 bg-white border border-gray-300 rounded shadow-lg"
+          className="ml-8 mb-2 p-3 bg-white border border-gray-300 rounded shadow-lg"
           onClick={(e) => e.stopPropagation()}
         >
-          <label className="block text-xs text-gray-700 mb-1">Move to:</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-medium text-gray-700">Move to:</label>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingParent(false);
+              }}
+              className="text-gray-400 hover:text-gray-600"
+              title="Cancel"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
           <select
             value={hierarchicalGroup.parentId || ''}
             onChange={(e) => handleChangeParent(e.target.value)}
-            className="w-full px-2 py-1 border border-gray-300 text-gray-700 rounded text-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.stopPropagation();
+                setIsEditingParent(false);
+              }
+            }}
+            className="w-full px-2 py-1 border border-gray-300 text-gray-700 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoFocus
           >
             <option value="">Root level</option>
             {getValidParentOptions().map((g) => (
@@ -202,6 +223,17 @@ function TreeNode({
               </option>
             ))}
           </select>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditingParent(false);
+              }}
+              className="flex-1 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
