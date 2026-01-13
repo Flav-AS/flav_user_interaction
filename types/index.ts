@@ -1,10 +1,25 @@
 // Core data types for the FLAV dashboard system
-
+export interface UserPermission {
+  email: string;
+  accessLevel: 'full' | 'limited';
+  allowedGroupIds: string[];
+}
 export interface Account {
   id: string;
   accountNumber: number;
   accountName: string;
   customMainGroup?: number;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  accountGroups: AccountGroup[];
+  groupHierarchy: GroupHierarchy[];
+  authorizedEmails: UserPermission[];
+  userPermissions?: UserPermission[]; // <-- ADD THIS LINE
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AccountGroup {
@@ -29,7 +44,7 @@ export interface Client {
   name: string;
   accountGroups: AccountGroup[];
   groupHierarchy: GroupHierarchy[];
-  authorizedEmails: string[];
+  authorizedEmails: UserPermission[];
   createdAt: string;
   updatedAt: string;
 }

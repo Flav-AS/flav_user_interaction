@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Client, AccountGroup } from '@/types';
 import ClientAccountsTreeView from '@/components/admin/ClientAccountsTreeView';
 import ClientAccountsList from '@/components/admin/ClientAccountsList';
+import EnhancedAccessControlManager from '@/components/admin/EnhancedAccessControlManager';
+
 
 export default function ClientAccountsPage() {
   const params = useParams();
@@ -380,7 +382,12 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
+          
+            <EnhancedAccessControlManager
+              client={client}
+              onUpdate={setClient}
+            />
+        
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ height: 'calc(100vh - 200px)' }}>
           {/* Left column: Account Groups Tree */}

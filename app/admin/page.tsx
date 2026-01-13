@@ -1,5 +1,5 @@
 'use client';
-
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -19,9 +19,17 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
   const [duplicating, setDuplicating] = useState<string | null>(null);
 
+  const { data: session, status } = useSession();
+
   useEffect(() => {
     fetchClients();
   }, []);
+
+  useEffect(() => {
+  if (status === 'unauthenticated') {
+    router.push('/login?callbackUrl=/admin');
+  }
+}, [status, router]);
 
   async function fetchClients() {
     try {
@@ -111,15 +119,19 @@ export default function AdminPage() {
     }
   }
 
-  if (loading) {
+  if (loading || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading clients...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
+  }
+
+  if (status === 'unauthenticated') {
+    return null; // Will redirect via useEffect
   }
 
   return (
@@ -241,8 +253,14 @@ export default function AdminPage() {
           )}
         </div>
 
-        <div className="mt-6 text-sm text-gray-500">
-          <p>Logged in as: demo@flav.com (Demo Mode)</p>
+        <div className="mt-6 text-sm text-gray-500 flex items-center justify-between">
+          <p>Logged in as: {session?.user?.email}</p>
+          <button
+            onClick={() => router.push('/profile')}
+            className="text-blue-600 hover:underline"
+          >
+            View Profile
+          </button>
         </div>
       </div>
     </div>

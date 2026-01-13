@@ -20,10 +20,22 @@ export default auth((req) => {
   if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.nextUrl))
   }
+  if (isAuthPageRoute && isLoggedIn) {
+    return NextResponse.redirect(new URL("/admin", req.nextUrl))
+  }
+
+   if (path.startsWith('/admin')) {
+    // If not authenticated, redirect to login
+    if (!req.auth) {
+      const loginUrl = new URL('/login', req.url);
+      loginUrl.searchParams.set('callbackUrl', path);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   return NextResponse.next();
 })
 
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+    matcher: ['/admin/:path*',"/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
