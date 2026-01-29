@@ -12,6 +12,32 @@ export const mockPogoAccounts: Account[] = [
   { id: '8', accountNumber: 7500, accountName: 'Depreciation' },
 ];
 
+// export default async function ServerDataFetcher() {
+//   const apiKey = process.env.API_KEY;
+//   const apiUrl = process.env.EXTERNAL_API_URL;
+
+//   if (!apiKey || !apiUrl) {
+//     console.error('Screts not found');;
+//   }
+
+//   const response = await fetch(apiUrl, {
+//     method: 'GET', // Or 'POST' if required by the API
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'x-api-key': apiKey, // Common header for API keys
+//       // Or 'Authorization': `Bearer ${apiKey}` if it uses a Bearer token
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch data');
+//   }
+
+//   const data = await response.json();
+
+//   return data;
+// }
+
 // Helper function to determine default POGO main group based on account number
 export function getDefaultPogoMainGroup(accountNumber: number): number {
   if (accountNumber >= 4000 && accountNumber <= 4999) return 2;

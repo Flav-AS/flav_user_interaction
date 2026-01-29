@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { GET } from '../api/clients/route';
 
 interface ClientSummary {
   id: string;
@@ -12,6 +13,7 @@ interface ClientSummary {
   updatedAt: string;
 }
 
+// console.log('Keys: ', process.env.NEXT_PUBLIC_API_Key);
 export default function AdminPage() {
   const router = useRouter();
   const [clients, setClients] = useState<ClientSummary[]>([]);
@@ -33,10 +35,11 @@ export default function AdminPage() {
 
   async function fetchClients() {
     try {
-      const res = await fetch('/api/clients', { cache: 'no-store' });
+      const res = await GET();
       if (res.ok) {
         const data = await res.json();
         setClients(data.clients);
+        console.log('AdminPage mounted', data);
       }
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -46,6 +49,15 @@ export default function AdminPage() {
   }
 
   async function createNewClient() {
+    const orgnrInput = prompt('Enter organization number (orgnr) for the new company:');
+    if (!orgnrInput) return;
+
+    const orgnr = Number(orgnrInput);
+    if (!Number.isFinite(orgnr) || orgnr <= 0) {
+      alert('Please enter a valid positive number for orgnr');
+      return;
+    }
+
     const name = prompt('Enter new client name:');
     if (!name || !name.trim()) return;
 
@@ -54,14 +66,15 @@ export default function AdminPage() {
       const res = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ orgnr, name: name.trim() }),
       });
 
       if (res.ok) {
         const data = await res.json();
         router.push(`/admin/clients/${data.client.id}`);
       } else {
-        alert('Failed to create client');
+        const err = await res.json().catch(() => null);
+        alert(err?.error || 'Failed to create client');
       }
     } catch (error) {
       console.error('Error creating client:', error);
@@ -72,6 +85,15 @@ export default function AdminPage() {
   }
 
   async function duplicateClient(clientId: string, clientName: string) {
+    const newOrgnrInput = prompt('Enter organization number (orgnr) for the duplicated company:');
+    if (!newOrgnrInput) return;
+
+    const newOrgnr = Number(newOrgnrInput);
+    if (!Number.isFinite(newOrgnr) || newOrgnr <= 0) {
+      alert('Please enter a valid positive number for orgnr');
+      return;
+    }
+
     const newName = prompt(`Enter name for duplicated client:`, `${clientName} (Copy)`);
     if (!newName || !newName.trim()) return;
 
@@ -80,7 +102,7 @@ export default function AdminPage() {
       const res = await fetch(`/api/clients/${clientId}/duplicate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName.trim() }),
+        body: JSON.stringify({ name: newName.trim(), orgnr: newOrgnr }),
       });
 
       if (res.ok) {
@@ -88,7 +110,8 @@ export default function AdminPage() {
         await fetchClients(); // Refresh the list
         router.push(`/admin/clients/${data.client.id}`);
       } else {
-        alert('Failed to duplicate client');
+        const err = await res.json().catch(() => null);
+        alert(err?.error || 'Failed to duplicate client');
       }
     } catch (error) {
       console.error('Error duplicating client:', error);

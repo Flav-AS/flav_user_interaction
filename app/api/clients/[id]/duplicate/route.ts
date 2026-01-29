@@ -1,7 +1,7 @@
-// app/api/clients/[id]/duplicate/route.ts
+// Duplicate a company + its account plans + permissions in the real Admin API.
 
 import { NextResponse } from 'next/server';
-import { dataService } from '@/lib/mockData';
+import { adminApi } from '@/lib/externalApi';
 
 export async function POST(
   request: Request,
@@ -9,8 +9,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { name } = await request.json();
-    
+    const body = await request.json();
+    const { name, orgnr } = body || {};
+
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json(
         { error: 'Client name is required' },
@@ -18,66 +19,76 @@ export async function POST(
       );
     }
 
-    // Get the original client
-    const originalClient = dataService.getClientById(id);
-    
-    if (!originalClient) {
+    if (!orgnr) {
       return NextResponse.json(
-        { error: 'Client not found' },
+        { error: 'New orgnr is required to duplicate a client' },
+        { status: 400 }
+      );
+    }
+
+    const sourceOrgnr = Number(id);
+    const newOrgnr = Number(orgnr);
+
+    if (!Number.isFinite(sourceOrgnr) || sourceOrgnr <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid source orgnr' },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isFinite(newOrgnr) || newOrgnr <= 0) {
+      return NextResponse.json(
+        { error: 'Invalid new orgnr' },
+        { status: 400 }
+      );
+    }
+
+    // Load source data
+    const [sourceCompany, sourcePlans, sourcePerms] = await Promise.all([
+      adminApi.getCompany(sourceOrgnr),
+      adminApi.getAccountPlansForOrgnr(sourceOrgnr),
+      adminApi.getPermissionsForOrgnr(sourceOrgnr),
+    ]);
+
+    if (!sourceCompany) {
+      return NextResponse.json(
+        { error: 'Source client not found' },
         { status: 404 }
       );
     }
 
-    // Create ID mappings for account groups to preserve parent-child relationships
-    const groupIdMap = new Map<string, string>();
-    
-    // First pass: generate new IDs for all groups
-    originalClient.accountGroups.forEach(group => {
-      const newId = `ag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      groupIdMap.set(group.id, newId);
+    // Create new company
+    const newCompany = await adminApi.createCompany({
+      orgnr: newOrgnr,
+      name: name.trim(),
     });
 
-    // Second pass: duplicate groups with mapped parent IDs
-    const duplicatedAccountGroups = originalClient.accountGroups.map(group => {
-      const newGroup: any = {
-        ...group,
-        id: groupIdMap.get(group.id)!,
-        accounts: group.accounts.map(account => ({
-          ...account,
-          id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        })),
-      };
+    // Duplicate account plans
+    for (const plan of sourcePlans) {
+      await adminApi.createAccountPlan({
+        orgnr: newCompany.orgnr,
+        account: plan.account,
+        groupId: plan.groupId,
+        name: plan.name,
+      });
+    }
 
-      // Map parentId to new ID if it exists
-      if ((group as any).parentId) {
-        const newParentId = groupIdMap.get((group as any).parentId);
-        if (newParentId) {
-          newGroup.parentId = newParentId;
-        }
-      }
+    // Duplicate permissions
+    for (const perm of sourcePerms) {
+      await adminApi.createPermission({
+        orgnr: newCompany.orgnr,
+        email: perm.email,
+        fullAccess: perm.fullAccess,
+        groupId: perm.groupId,
+      });
+    }
 
-      return newGroup;
-    });
-
-    // Duplicate hierarchy with new IDs
-    const duplicatedHierarchy = originalClient.groupHierarchy.map(hierarchy => ({
-      ...hierarchy,
-      id: `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    }));
-
-    // Create a new client with duplicated data
-    const newClient = dataService.createClient(name.trim());
-    
-    // Update the new client with all the duplicated data
-    const updatedClient = dataService.updateClient(newClient.id, {
-      accountGroups: duplicatedAccountGroups,
-      groupHierarchy: duplicatedHierarchy,
-      authorizedEmails: [...originalClient.authorizedEmails],
-    });
-
-    return NextResponse.json({ client: updatedClient }, { status: 201 });
+    return NextResponse.json(
+      { client: { id: String(newCompany.orgnr), name: newCompany.name } },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Duplicate error:', error);
+    console.error('Duplicate error (backend)', error);
     return NextResponse.json(
       { error: 'Failed to duplicate client' },
       { status: 500 }
